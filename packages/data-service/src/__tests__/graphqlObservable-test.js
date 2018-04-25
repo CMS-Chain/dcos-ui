@@ -20,6 +20,10 @@ const typeDefs = `
   type Query {
     launched(name: String): [Shuttle!]!
   }
+  
+  type Mutation {
+    createShuttle(name: String): Shuttle!
+  }  
 `;
 
 const mockResolvers = {
@@ -40,6 +44,15 @@ const mockResolvers = {
           .combineLatest(name, (res, name) => [res, name])
           .map(els => els[0].filter(el => el.name === els[1]));
       }
+    }
+  },
+  Mutation: {
+    createShuttle: (parent, args, ctx) => {
+      return ctx.mutation.map(() => {
+        return {
+          name: args.name
+        };
+      });
     }
   }
 };
@@ -216,6 +229,33 @@ describe("graphqlObservable", function() {
       });
 
       m.expect(result.take(1)).toBeObservable(expected);
+    });
+  });
+
+  describe("Mutation", function() {
+    itMarbles("triggers the desired mutation returning its fields", function(
+      m
+    ) {
+      const mutation = gql`
+        mutation {
+          createShuttle(name: "RocketShip") {
+            name
+          }
+        }
+      `;
+
+      const fakeRequest = {};
+      const commandContext = Observable.of(fakeRequest);
+
+      const result = graphqlObservable(mutation, schema, {
+        mutation: commandContext
+      });
+
+      const expected = m.cold("(a|)", {
+        a: { createShuttle: { name: "RocketShip" } }
+      });
+
+      m.expect(result).toBeObservable(expected);
     });
   });
 });
