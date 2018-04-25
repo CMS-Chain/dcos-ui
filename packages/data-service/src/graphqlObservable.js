@@ -51,7 +51,19 @@ function resolveStep(typeMap, definition, context, parent) {
       null // that would be the info
     );
 
+    if (!resolvedObservable) {
+      return Observable.throw(
+        new Error("graphqlObservable error: empty resolution")
+      );
+    }
+
     return resolvedObservable.map(emittedResults => {
+      if (!emittedResults) {
+        return Observable.throw(
+          new Error("graphqlObservable error: result not emitted")
+        );
+      }
+
       if (!emittedResults.map) {
         return emittedResults;
       }

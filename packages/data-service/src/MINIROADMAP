@@ -1,0 +1,5 @@
+// "graphqlObservable error: kind ${definition.kind} is not supported"
+// "graphqlObservable error: result not emitted"
+// "graphqlObservable error: empty resolution"
+
+//import { Document } from "graphql";
