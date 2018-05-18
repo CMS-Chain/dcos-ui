@@ -1,0 +1,11 @@
+{
+  "name": "extensions-framework",
+  "module": "index.ts",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "scripts": {},
+  "peerDependencies": {
+    "inversify": "4.13.0"
+  },
+  "devDependencies": {}
+}
