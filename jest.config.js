@@ -48,7 +48,7 @@ module.exports = {
   transform: { ".*": "./jest/preprocessor.js" },
   setupTestFrameworkScriptFile: "./jest/setupTestFramework.js",
   setupFiles: ["./jest/setupEnv.js"],
-  testRegex: "/__tests__/.*\\-test\\.(es6|js)$",
+  testRegex: "/__tests__/.*\\-test\\.(es6|js|ts)$",
   moduleFileExtensions: ["ts", "js", "json", "es6"],
   modulePathIgnorePatterns: ["/tmp/", "/node_modules/", "/.module-cache/"],
   timers: "fake",
