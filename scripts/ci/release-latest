@@ -36,7 +36,7 @@ PKG_TARGET=$(python -c "import sys, json; \
   sys.stdout.write(str(dcosrc['base']));")
 
 # release version
-PKG_VERSION="latest"
+PKG_VERSION="latest+${GIT_COMMIT:0:8}"
 
 # build release name for branch and file names
 RELEASE_NAME="${PKG_TARGET}+dcos-ui-${PKG_VERSION}"
@@ -46,10 +46,13 @@ RELEASE_NAME="${PKG_TARGET}+dcos-ui-${PKG_VERSION}"
 # - dcos-ui/master/dcos-ui-latest
 # - dcos-ui/1.12/dcos-ui-latest
 # - dcos-ui/1.11/dcos-ui-latest
-DCOS_BRANCH="dcos-ui/${RELEASE_NAME}"
+DCOS_BRANCH="dcos-ui/${RELEASE_NAME%+${GIT_COMMIT:0:8}}"
 
 ## Create Assets & Generate Upload Data
 #####################################################################
+
+# first, delete all old latest build for this version:
+aws s3 rm "s3://downloads.mesosphere.io/dcos-ui/${RELEASE_NAME%+${GIT_COMMIT:0:8}}*"
 
 FORCE_UPLOAD=${FORCE_UPLOAD} \
   RELEASE_NAME="${RELEASE_NAME}" \
