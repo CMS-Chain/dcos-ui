@@ -27,9 +27,6 @@ SCRIPT_PATH="$(cd $(dirname "$0")/$(dirname "$(readlink "$0")") && pwd)"
 # project root for this file
 PROJECT_ROOT="$( cd "$( echo ${SCRIPT_PATH} | sed s+/scripts/ci++)" && pwd )"
 
-# forces overwrite of file (latest is overwritten each time)
-FORCE_UPLOAD=${FORCE_UPLOAD:-0}
-
 # get correct DC/OS target (=base branch!) from .dcosrc file
 PKG_TARGET=$(python -c "import sys, json; \
   dcosrc = json.load(open('$PROJECT_ROOT/.dcosrc')); \
@@ -51,13 +48,14 @@ DCOS_BRANCH="dcos-ui/${RELEASE_NAME%+${GIT_COMMIT:0:8}}"
 ## Create Assets & Generate Upload Data
 #####################################################################
 
-# first, delete all old latest build for this version:
-aws s3 rm "s3://downloads.mesosphere.io/dcos-ui/${RELEASE_NAME%+${GIT_COMMIT:0:8}}*"
+RELEASE_NAME="${RELEASE_NAME}" \
+  ${SCRIPT_PATH}/utils/upload-build || exit 0
 
-FORCE_UPLOAD=${FORCE_UPLOAD} \
-  RELEASE_NAME="${RELEASE_NAME}" \
-  ${SCRIPT_PATH}/utils/upload-build
-
+# cleanup all old latest build for this version:
+aws s3 ls "s3://downloads.mesosphere.io/dcos-ui/${RELEASE_NAME%+${GIT_COMMIT:0:8}}" \
+  | rev | cut -d ' ' -f1 | rev \
+  | grep -v ${RELEASE_NAME}.tar.gz \
+  | while read FNAME; do aws s3 rm "s3://downloads.mesosphere.io/dcos-ui/$FNAME"; done
 
 ## Update DC/OS
 #####################################################################
