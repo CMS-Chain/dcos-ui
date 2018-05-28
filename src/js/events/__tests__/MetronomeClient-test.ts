@@ -56,4 +56,24 @@ describe("MetronomeClient", () => {
       m.expect(result$).toBeObservable(expected$);
     }));
   });
+
+  describe("#fetchJobs", () => {
+    it("makes a request", () => {
+      MetronomeClient.fetchJobs();
+      expect(mockRequest).toHaveBeenCalled();
+    });
+
+    it("sends data to the correct URL", () => {
+      MetronomeClient.fetchJobs();
+      expect(mockRequest).toHaveBeenCalledWith(`${Config.metronomeAPI}/v1/jobs?embed=activeRuns&embed=schedules&embed=historySummary`, expect.anything());
+    });
+
+    it("debounces on error");
+    it("emits an event if the data is received");
+    it("emits an event on error");
+    describe("request in progress", () => {
+      it("emits an event");
+      it("doesn't make a request");
+    })
+  })
 });
