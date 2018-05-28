@@ -23,24 +23,21 @@ import {
 import AppDispatcher from "./AppDispatcher";
 import Config from "../config/Config";
 
+import { createJob as createJobStream } from "./MetronomeClient";
+
 const MetronomeActions = {
   createJob(data) {
-    RequestUtil.json({
-      url: `${Config.metronomeAPI}/v0/scheduled-jobs`,
-      method: "POST",
-      data,
-      success() {
+    createJobStream(data).subscribe({
+      next: () =>
         AppDispatcher.handleServerAction({
           type: REQUEST_METRONOME_JOB_CREATE_SUCCESS
-        });
-      },
-      error(xhr) {
+        }),
+      error: xhr =>
         AppDispatcher.handleServerAction({
           type: REQUEST_METRONOME_JOB_CREATE_ERROR,
           data: RequestUtil.parseResponseBody(xhr),
           xhr
-        });
-      }
+        })
     });
   },
 

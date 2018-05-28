@@ -1,3 +1,10 @@
+import { Observable } from "rxjs";
+
+const mockCreateJob = jest.fn();
+jest.mock("../MetronomeClient", () => ({
+  createJob: mockCreateJob
+}));
+
 const RequestUtil = require("mesosphere-shared-reactjs").RequestUtil;
 
 const ActionTypes = require("../../constants/ActionTypes");
@@ -10,31 +17,29 @@ let thisConfiguration;
 describe("MetronomeActions", function() {
   describe("#createJob", function() {
     beforeEach(function() {
-      spyOn(RequestUtil, "json");
-      MetronomeActions.createJob();
-      thisConfiguration = RequestUtil.json.calls.mostRecent().args[0];
+      jest.clearAllMocks();
     });
 
-    it("calls #json from the RequestUtil", function() {
-      expect(RequestUtil.json).toHaveBeenCalled();
+    it("calls the createJob", function() {
+      mockCreateJob.mockReturnValueOnce(Observable.of({}));
+      MetronomeActions.createJob({});
+
+      expect(mockCreateJob).toHaveBeenCalled();
     });
 
-    it("sends data to the correct URL", function() {
-      expect(thisConfiguration.url).toEqual(
-        `${Config.metronomeAPI}/v0/scheduled-jobs`
-      );
-    });
-
-    it("dispatches the correct action when successful", function() {
+    it("dispatches the correct action when successful", function(done) {
       var id = AppDispatcher.register(function(payload) {
         var action = payload.action;
         AppDispatcher.unregister(id);
         expect(action.type).toEqual(
           ActionTypes.REQUEST_METRONOME_JOB_CREATE_SUCCESS
         );
+        done();
       });
 
-      thisConfiguration.success([]);
+      mockCreateJob.mockReturnValueOnce(Observable.of({}));
+
+      MetronomeActions.createJob({});
     });
 
     it("dispatches the correct action when unsuccessful", function() {
@@ -46,23 +51,21 @@ describe("MetronomeActions", function() {
         );
       });
 
-      thisConfiguration.error({ message: "error" });
+      mockCreateJob.mockReturnValueOnce(Observable.throw({ message: "error" }));
+
+      MetronomeActions.createJob({});
     });
 
-    it("dispatches the xhr when unsuccessful", function() {
+    it("dispatches the correct error when unsucessful", function() {
       var id = AppDispatcher.register(function(payload) {
         var action = payload.action;
         AppDispatcher.unregister(id);
-        expect(action.xhr).toEqual({
-          foo: "bar",
-          responseJSON: { description: "baz" }
-        });
+        expect(action.xhr).toEqual({ message: "error" });
       });
 
-      thisConfiguration.error({
-        foo: "bar",
-        responseJSON: { description: "baz" }
-      });
+      mockCreateJob.mockReturnValueOnce(Observable.throw({ message: "error" }));
+
+      MetronomeActions.createJob({});
     });
   });
 
